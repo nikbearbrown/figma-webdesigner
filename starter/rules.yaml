@@ -1,0 +1,9 @@
+# STARTER rulebook, copied into your audit folder by `./fwd init`.
+# Gate G1 (you confirm or edit it) is PENDING until you say so in step 2 of the tutorial.
+# Tiers: normative = a published standard; heuristic = expert rule of thumb; house = your own rule.
+- {id: NIELSEN-H8, title: Aesthetic and minimalist design, tier: heuristic, mode: judgment, source: "Nielsen & Molich 1990; Usability Engineering 1993", default_severity: 2, fidelity: structural}
+- {id: NIELSEN-H4, title: Consistency and standards, tier: heuristic, mode: judgment, source: "Nielsen 1993", default_severity: 2, fidelity: structural}
+- {id: NIELSEN-H2, title: Match between system and the real world, tier: heuristic, mode: judgment, source: "Nielsen 1993", default_severity: 2, fidelity: structural}
+- {id: LAWSOFUX-VON-RESTORFF, title: Von Restorff effect (the item that differs is remembered), tier: heuristic, mode: judgment, source: "lawsofux.com", default_severity: 2, fidelity: structural}
+- {id: WCAG22-2.5.8, title: Target Size (Minimum), tier: normative, mode: assisted, source: "https://www.w3.org/TR/WCAG22/#target-size-minimum", threshold: {min_px: 24, spacing_exception_px: 24}, default_severity: 3, fidelity: visual}
+- {id: NIELSEN-H6, title: Recognition rather than recall, tier: heuristic, mode: judgment, source: "Nielsen 1993", default_severity: 2, fidelity: structural}

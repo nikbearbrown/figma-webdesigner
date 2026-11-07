@@ -1,6 +1,6 @@
 ---
 name: figma-webdesigner
-description: Audits a website the user has cloned locally (for example from GitHub or the repo behind a Vercel project) against a versioned design rulebook (WCAG 2.2 AA plus heuristics plus house rules) at every breakpoint, builds as-is and to-be wireframes in Figma through the Figma MCP, records every proposed change, its reasons, and human sign-off in an append-only decision ledger with provenance, and hands approved changes to Claude Code or Codex as implementation briefs. Use whenever the user wants a design audit, UX audit, accessibility review, responsive review, redesign wireframes from their site, Figma wireframes with decision tracking, design sign-off records, or a design-to-implementation handoff, even if they only say "audit my site" or "wireframe the fixes."
+description: Audits a website the user has cloned locally (for example from GitHub or the repo behind a Vercel project) against a versioned design rulebook (WCAG 2.2 AA plus heuristics plus house rules) at every breakpoint, builds as-is and to-be wireframes in Figma through the Figma MCP, records every proposed change, its reasons, and human sign-off in an append-only decision ledger with provenance, and hands approved changes to Claude Code or Codex as implementation briefs. Use whenever the user wants a design audit, UX audit, accessibility review, responsive review, redesign wireframes from their site, Figma wireframes with decision tracking, design sign-off records, or a design-to-implementation handoff, even if they only say "audit my site" or "wireframe the fixes." Also use when the user types `help`, `check` or `tutorial` in this skill's folder, or asks what figma-webdesigner needs or where to start.
 ---
 
 # Site Design Audit → Wireframes → Decision Ledger
@@ -15,6 +15,15 @@ Turn a local clone of a website into: (1) hashed evidence pinned to a git commit
 2. This skill captures from the local dev server, audits, and builds wireframes in Figma.
 3. A human triages findings, reviews decisions, and approves.
 4. This skill writes a handoff brief per approved decision. Claude Code or Codex implements each one on its own branch. This skill recaptures to verify.
+
+## Commands
+
+The skill folder has a command, `fwd`, and a `CLAUDE.md` that says how to answer it. When the user types `help`, `check`, `init` or `tutorial`, follow `CLAUDE.md`:
+
+- `help` runs `fwd help` (setup checks plus one next step) and, with the Figma tools present, `whoami` for the seat. Missing things first; one next step; no changes made on the student's behalf.
+- `tutorial` runs the seven-step first tutorial (redesign your home page). It is this skill's own phases, driven step by step.
+- `fwd approve|reject|defer <D-id>` is the student's, run in their own terminal. It writes the approval file and the ledger event. Non-negotiable 1 applies: never run it, never write `audit/approvals/`.
+- `fwd ledger verify` checks the hash chain and that each approval file matches the ledger.
 
 ## Non-negotiables
 

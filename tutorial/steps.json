@@ -1,0 +1,62 @@
+{
+  "title": "Redesign your home page",
+  "intro": "You take your own home page, Claude draws it as a wireframe in Figma, suggests changes with reasons, draws the rewritten page, and you accept or reject each change. Nothing touches your site's code.",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Get set up",
+      "mode": "derived",
+      "you": "Run ./fwd help and fix what it lists as missing (a copy of your site on this computer, installs, the Figma connection).",
+      "claude": "Runs ./fwd check, then asks Figma who you are (whoami) to confirm your seat can write. Gives you the exact command for anything missing.",
+      "done_when": "Every required check passes and a site is set (./fwd init <path>)."
+    },
+    {
+      "id": 2,
+      "title": "Say what to look at",
+      "mode": "derived",
+      "you": "Answer a few questions: which page (start with the home page), who may approve, and that the site is yours or you have permission. Confirm or edit the starter rulebook.",
+      "claude": "Fills audit/intent.yaml from your answers, one or two questions at a time, and pins the commit. Records your confirmation of the rulebook.",
+      "done_when": "audit/intent.yaml has every required field filled."
+    },
+    {
+      "id": 3,
+      "title": "Wireframe the page as it is today",
+      "mode": "manual",
+      "you": "Open the Figma link Claude gives you and look at the 'As-Is' wireframes at desktop and phone width.",
+      "claude": "Measures the page, then draws it in a new Figma file as plain boxes and labels, and records what it wrote.",
+      "done_when": "The as-is wireframes exist in Figma and you have looked at them. Claude marks this step done."
+    },
+    {
+      "id": 4,
+      "title": "Read the suggestions",
+      "mode": "derived",
+      "you": "Read each finding (what is wrong, which rule says so, how sure Claude is) and each proposed change with its reasons and the options it passed over. Say which findings you agree with.",
+      "claude": "Writes findings that each cite a rule, groups the ones you accept into proposed changes (D-0001, D-0002, ...), and puts them in Figma next to the wireframes.",
+      "done_when": "findings.json and at least one decision record exist."
+    },
+    {
+      "id": 5,
+      "title": "See the rewritten page",
+      "mode": "manual",
+      "you": "Compare the 'To-Be' wireframe with the 'As-Is' one. Every difference carries a change number so you can tell what each change is for.",
+      "claude": "Draws the rewritten page in Figma, tags every difference with its change number, and lists any difference that has none.",
+      "done_when": "The to-be wireframes exist and you have looked at them. Claude marks this step done."
+    },
+    {
+      "id": 6,
+      "title": "Accept or reject",
+      "mode": "derived",
+      "you": "In your own terminal, run ./fwd approve D-0001 (or reject, or defer) for each change. You type your name and confirm. Then commit the approval file.",
+      "claude": "Waits. It cannot approve, reject or defer for you, and chat does not count. If you say 'approved' in chat it will point you to this command.",
+      "done_when": "Every proposed change is approved, rejected or deferred by a person."
+    },
+    {
+      "id": 7,
+      "title": "Hand the approved changes to an implementer",
+      "mode": "derived",
+      "you": "Choose Claude Code or Codex to make the changes, in a separate session, one branch per change.",
+      "claude": "Writes a short brief for each approved change, with what was and was not approved, the Figma frames, the likely files and the checks to re-run. It never edits your site.",
+      "done_when": "Each approved change has a brief in audit/handoff/ (or nothing was approved)."
+    }
+  ]
+}

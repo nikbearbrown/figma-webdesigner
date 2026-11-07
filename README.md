@@ -4,10 +4,37 @@ A Claude skill for redesigning your own website with Claude and Figma, with a pa
 
 You point it at a copy of your site. It audits a page against a written rulebook, draws the **current** page as a wireframe in Figma (through the Figma MCP), proposes changes with reasons, draws the **proposed** page, and records every suggestion so you can accept or reject each one. Approved changes are handed to Claude Code or Codex as small implementation briefs.
 
+## Get started
+
+```bash
+git clone https://github.com/nikbearbrown/figma-webdesigner
+cd figma-webdesigner
+./fwd help
+```
+
+`./fwd help` checks what you have and what you are missing (git, Node, Claude Code, the Figma connection, a local copy of your site, its installs) and names the one thing to do next. Fix it, run it again. When it says you are ready, open Claude Code in this folder and type `tutorial`.
+
+You can also type `help` inside Claude Code in this folder: Claude runs the same checks, asks Figma which plan and seat you are on, and answers in the same shape.
+
+The first tutorial is the one this was built from: take your home page, wireframe it as it is today, see suggestions with reasons, see the rewritten wireframe, and accept or reject each change. See [tutorial/README.md](tutorial/README.md).
+
+| Command | What it does |
+|---|---|
+| `./fwd help` | Checks your setup, names the next step |
+| `./fwd check [--json]` | The checks alone |
+| `./fwd init <site folder>` | Makes an audit folder for your site's local copy |
+| `./fwd tutorial` | Shows the seven steps and the current one |
+| `./fwd approve <D-id>` (also `reject`, `defer`) | **You** decide a change, in your own terminal |
+| `./fwd ledger verify` | Checks the record has not been altered |
+| `./fwd install` | Links this folder as a Claude skill for every project |
+
+Needs Python 3.9+ (standard library only), git, and for your site, Node 18+.
+
 ## Status: early
 
-- This repo is the skill (`SKILL.md`) only. It has been run by hand once, on one site: the front page of [jobs.humanitarians.ai](https://jobs.humanitarians.ai/). The audit, the Figma wireframes and the redesign shipped to a Vercel preview and then production.
-- **Next:** a `help` command that checks what you are missing (a local copy of your site, installs, the Figma connection) and walks you through the first steps, and a built-in first tutorial: take your home page, wireframe it, see suggestions, accept or reject them.
+- The skill has been run by hand once, on the front page of [jobs.humanitarians.ai](https://jobs.humanitarians.ai/): audit, Figma wireframes, Vercel preview, production.
+- The `fwd` command and tutorial are new and have been tested here only: 15 unit tests, a real run of `help` against a machine that has everything but a site, and the ledger check against the jobs audit (43 events, valid). **Not yet tested:** a clean machine without Node or Figma, a student running the whole tutorial, Windows.
+- `./fwd approve` refuses to run unless a person is at a terminal. That prevents accidents; it is not a lock. The real control is that you commit the approval file and someone can review it.
 - No `LICENSE` file has been chosen yet, so all rights are reserved until the author adds one.
 
 ## What you need
@@ -15,15 +42,7 @@ You point it at a copy of your site. It audits a page against a written rulebook
 - [Claude Code](https://claude.com/claude-code)
 - The Figma plugin / MCP server, signed in on a plan whose seat can write (Figma education plans work)
 - Git and Node (to run a local copy of your site)
-- A site you own or have permission to change, as a Git repo (for example one deployed on Vercel)
-
-## Install
-
-```bash
-git clone https://github.com/nikbearbrown/figma-webdesigner ~/.claude/skills/figma-webdesigner
-```
-
-Then, in Claude Code, ask it to use the `figma-webdesigner` skill on your site.
+- A site you own or have permission to change, as a Git repo (for example one deployed on Vercel). From Vercel, the project's Settings, then Git, names the repo.
 
 ## How it works
 
