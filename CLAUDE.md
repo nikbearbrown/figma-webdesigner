@@ -31,6 +31,13 @@ If the skill is installed (`./fwd install`), run the command by its path: `~/.cl
 5. Step 7: write one handoff brief per approved decision (`SKILL.md`, gate G5), then give the one-line prompt for the implementer. Never edit the student's site.
 6. After each step, run `./fwd ledger verify` if you appended ledger events, and report the result in a line.
 
+## When the user asks about colors (or types `palettes`)
+
+1. Run `./fwd palettes`. It lists the four default color sets: `bear-brown` (the default), `brutalist`, `northeastern`, `humanitarians`.
+2. For one set in full, `./fwd palettes <id>`: every role, light and dark, the contrast of each pairing, and notes. Say which pairings are marked `LOW`.
+3. In tutorial step 2, ask which set the wireframes should use and write it to `palette:` in `audit/intent.yaml`. No answer means the default; say that you used it.
+4. To put the colors in Figma, run the script that `./fwd palettes <id> --figma` prints. Never retype a hex value from memory. `SKILL.md`, Colors, has the rules.
+
 ## Other commands
 
 - `check`: `./fwd check` (add `--json` to parse it). Same checks as `help`, no commentary.

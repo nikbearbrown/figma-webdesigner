@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "checked": "2026-11-10",
+  "default": "bear-brown",
+  "about": "The four default color sets for figma-webdesigner and figma-appdesigner. Every value was read from the page named in `source` on the `checked` date. This file is the same in both tools; change it in both.",
+  "roles": {
+    "ground": "the page or screen background",
+    "surface": "cards, panels, sheets: one step off the ground",
+    "ink": "main text and icons",
+    "ink-soft": "secondary text",
+    "border": "hairlines and dividers (decorative: not relied on to find a control)",
+    "accent": "the one color for the main action and for emphasis",
+    "on-accent": "text and icons that sit on the accent"
+  },
+  "wireframe": {
+    "name": "Wireframe",
+    "about": "Greys only, for drawing a layout before any color goes on. It is not a brand set and nobody ships it. In Figma it is one more mode of the Palette variables, so a wireframe becomes a styled screen by switching the frame's mode, not by redrawing.",
+    "type": {"heading": "Inter", "body": "Inter"},
+    "roles": {"ground": "#FFFFFF", "surface": "#F2F2F2", "ink": "#1F1F1F", "ink-soft": "#5E5E5E", "border": "#BDBDBD", "accent": "#4A4A4A", "on-accent": "#FFFFFF"}
+  },
+  "palettes": [
+    {
+      "id": "bear-brown",
+      "name": "Bear Brown",
+      "source": "https://www.bearbrown.co/",
+      "how_read": "CSS custom properties of the live page (.light and .dark)",
+      "type": {"heading": "EB Garamond", "body": "Inter"},
+      "modes": {
+        "light": {"ground": "#FAF9F5", "surface": "#F3EBDD", "ink": "#3D3929", "ink-soft": "#6B6047", "border": "#E2D9CA", "accent": "#8B3A0F", "on-accent": "#FAF9F5"},
+        "dark": {"ground": "#1A0A00", "surface": "#2A1200", "ink": "#F0E6D0", "ink-soft": "#DFC99A", "border": "#423324", "accent": "#E8A020", "on-accent": "#1A0A00"}
+      },
+      "named": {
+        "bb-1 espresso": "#1A0A00",
+        "bb-2 burnt orange": "#8B3A0F",
+        "bb-3 brick": "#A52A1A",
+        "bb-4 amber": "#E8A020",
+        "bb-5 rust": "#B5420A",
+        "bb-6 dark goldenrod": "#B8860B",
+        "bb-7 sand": "#C8A96E",
+        "bb-8 parchment": "#F0E6D0",
+        "terracotta (decoration only)": "#D97757",
+        "meaning blue": "#0072B2",
+        "meaning vermilion": "#D55E00",
+        "muted ink (large text only)": "#9E8C6C",
+        "button brown": "#381700"
+      },
+      "notes": [
+        "Terracotta #D97757 is decoration only: it is under 3:1 on the cream ground, so never use it for text or for a control's only boundary.",
+        "Muted ink #9E8C6C is for large text only.",
+        "The role names here (ground, ink, ...) are this tool's. The site calls them --p-bg, --p-ink, --p-ink-soft, --m-accent and so on."
+      ]
+    },
+    {
+      "id": "brutalist",
+      "name": "Brutalist",
+      "source": "https://www.brutalist.art/",
+      "how_read": "computed colors of the rendered home page, plus its .dark custom properties",
+      "type": {"heading": "Inter", "body": "Inter"},
+      "modes": {
+        "light": {"ground": "#FFFFFF", "surface": "#F1F5F9", "ink": "#020817", "ink-soft": "#64748B", "border": "#E2E8F0", "accent": "#000000", "on-accent": "#FFFFFF"},
+        "dark": {"ground": "#020817", "surface": "#1E293B", "ink": "#F8FAFC", "ink-soft": "#94A3B8", "border": "#1E293B", "accent": "#F8FAFC", "on-accent": "#020817"}
+      },
+      "named": {
+        "bb-1 espresso": "#1A0A00",
+        "bb-2 burnt orange": "#8B3A0F",
+        "bb-3 brick": "#A52A1A",
+        "bb-4 amber": "#E8A020",
+        "bb-5 rust": "#B5420A",
+        "bb-6 dark goldenrod": "#B8860B",
+        "bb-7 sand": "#C8A96E",
+        "bb-8 parchment": "#F0E6D0"
+      },
+      "notes": [
+        "This is what brutalist.art shows: black on white with slate greys and solid black buttons. The eight browns are declared in the site's stylesheet but no element on the home page uses them.",
+        "The Brutalist film toolkit uses a different set (cream #FAF9F5, warm ink #3D3929, one terracotta #D97757). That set is the Bear Brown palette here.",
+        "Dark: the site's solid buttons stayed black when the page was switched to dark, which is nearly invisible on #020817. The dark accent here is the site's light foreground instead. That is this tool's choice, not the site's.",
+        "Slate secondary text #64748B on the slate surface #F1F5F9 is 4.34:1, just under 4.5:1. Put small secondary text on the white ground, or use the ink on cards."
+      ]
+    },
+    {
+      "id": "northeastern",
+      "name": "Northeastern",
+      "source": "https://brand.northeastern.edu/design-and-experiences/design/color/",
+      "how_read": "the Brand Center color page (published hex values)",
+      "type": {"heading": "Lato", "body": "Lato"},
+      "modes": {
+        "light": {"ground": "#FFFFFF", "surface": "#F6F6F4", "ink": "#000000", "ink-soft": "#49494D", "border": "#E0E0E0", "accent": "#C8102E", "on-accent": "#FFFFFF"}
+      },
+      "named": {
+        "NU Red": "#C8102E",
+        "White": "#FFFFFF",
+        "Black": "#000000",
+        "NU Canvas": "#F6F6F4",
+        "NU Cool Black": "#1E2028",
+        "NU Bold Gold": "#A4804A",
+        "NU Light Gold": "#C8A978",
+        "grey 900": "#17191F",
+        "grey 800": "#1E2028",
+        "grey 700": "#49494D",
+        "grey 500": "#9B9C9E",
+        "grey 300": "#E0E0E0",
+        "grey 200": "#EBEBEB",
+        "grey 100": "#F5F5F5"
+      },
+      "notes": [
+        "The Brand Center publishes no dark mode, so this palette has a light mode only.",
+        "Red goes in every piece, but not as a sea of red. Gold is reserved (about 5% of a design at most, mostly the Office of the President).",
+        "Units may not have their own identity palettes. Colors do not give permission to use Northeastern's logos or name: those have their own rules.",
+        "The Brand Center's type is FF Real Head Pro (licensed). Lato is the free stand-in used here."
+      ]
+    },
+    {
+      "id": "humanitarians",
+      "name": "Humanitarians AI",
+      "source": "https://www.humanitarians.ai/",
+      "how_read": "CSS custom properties of the live page (:root and .dark)",
+      "type": {"heading": "Inter", "body": "Inter"},
+      "modes": {
+        "light": {"ground": "#FFFFFF", "surface": "#FAF8F4", "ink": "#1B1B1B", "ink-soft": "#4A4D4F", "border": "#8F8F8F", "accent": "#7A0000", "on-accent": "#FFFFFF"},
+        "dark": {"ground": "#171717", "surface": "#212121", "ink": "#F5F5F5", "ink-soft": "#A1A1A1", "border": "#4C4C4C", "accent": "#B20000", "on-accent": "#FFFFFF"}
+      },
+      "named": {
+        "obsidian": "#1B1B1B",
+        "blood red": "#7A0000",
+        "warm clay": "#A89068",
+        "dim gray": "#4A4D4F",
+        "mist": "#797C7F",
+        "silver": "#8F8F8F",
+        "white": "#FFFFFF"
+      },
+      "notes": [
+        "Secondary text here is dim gray #4A4D4F. The site's own muted text (mist, about #7D7D7D) is under 4.5:1 on white, so keep mist for large text.",
+        "Warm clay #A89068 is a fill and a decoration: dark text on it passes, white text on it does not.",
+        "Dark: the red #B20000 against the dark ground is 2.47:1, under the 3:1 a control's edge needs. A dark-mode red button must carry a clear label (white on it passes) or a lighter outline."
+      ]
+    }
+  ]
+}

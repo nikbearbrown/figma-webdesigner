@@ -199,5 +199,86 @@ class Checks(Base):
         self.assertEqual({i["id"]: i for i in fwd.run_checks(with_mcp=False)}["site"]["status"], "warn")
 
 
+class Palettes(Base):
+    def setUp(self):
+        super().setUp()
+        self.data = fwd.pal.load(fwd.REPO)
+
+    def test_the_four_default_sets_are_there_and_well_formed(self):
+        self.assertEqual(fwd.pal.ids(self.data), ["bear-brown", "brutalist", "northeastern", "humanitarians"])
+        self.assertEqual(fwd.pal.problems(self.data), [])
+        self.assertEqual(self.data["default"], "bear-brown")
+        for p in self.data["palettes"]:
+            self.assertTrue(p["source"].startswith("https://"))
+
+    def test_contrast_is_the_wcag_formula(self):
+        self.assertAlmostEqual(fwd.pal.contrast("#000000", "#FFFFFF"), 21.0, places=2)
+        self.assertAlmostEqual(fwd.pal.contrast("#FFFFFF", "#FFFFFF"), 1.0, places=2)
+        # Northeastern's Brand Center quotes red on white as 5.9:1
+        self.assertAlmostEqual(fwd.pal.contrast("#C8102E", "#FFFFFF"), 5.9, delta=0.05)
+
+    def test_text_is_readable_in_every_set_and_low_pairs_are_written_down(self):
+        low = []
+        for p in self.data["palettes"]:
+            for c in fwd.pal.checks(p):
+                if c["pair"] in ("text", "text on cards", "secondary text", "button label"):
+                    self.assertTrue(c["passes"], (p["id"], c))
+                elif not c["passes"]:
+                    low.append((p["id"], c["mode"], c["pair"], c["ratio"]))
+                    self.assertTrue(any(f"{c['ratio']:.2f}:1" in n for n in p["notes"]), (p["id"], c))
+        # the two known low pairs, so a change to the colors is noticed
+        self.assertEqual(sorted(low), [("brutalist", "light", "secondary text on cards", 4.34),
+                                       ("humanitarians", "dark", "button against the page", 2.47)])
+
+    def test_bad_file_is_reported(self):
+        bad = {"default": "x", "palettes": [{"id": "a", "name": "A", "source": "s", "modes": {"dark": {"ground": "red"}}}]}
+        probs = fwd.pal.problems(bad)
+        self.assertTrue(any("no light mode" in p for p in probs))
+        self.assertTrue(any("not a #RRGGBB" in p for p in probs))
+        self.assertTrue(any("default" in p for p in probs))
+
+    def test_init_writes_the_default_and_accepts_a_choice(self):
+        audit = self.init()
+        self.assertEqual(fwd.read_intent(audit / "intent.yaml")["palette"], "bear-brown")
+        self.assertEqual(fwd.palette_check("")["status"], "ok")
+        self.assertEqual(fwd.palette_check("northeastern")["status"], "ok")
+        self.assertEqual(fwd.palette_check("mauve")["status"], "warn")
+
+    def test_init_refuses_an_unknown_palette_and_creates_nothing(self):
+        rc = fwd.cmd_init(argparse.Namespace(site=str(self.site), label=None, palette="mauve"))
+        self.assertEqual(rc, 2)
+        self.assertFalse((fwd.HOME / "my-site").exists())
+
+    def test_init_with_palette(self):
+        self.assertEqual(fwd.cmd_init(argparse.Namespace(site=str(self.site), label=None, palette="humanitarians")), 0)
+        self.assertEqual(fwd.read_intent(fwd.audit_dir() / "intent.yaml")["palette"], "humanitarians")
+
+    def test_cli_palettes(self):
+        self.assertEqual(fwd.main(["palettes"]), 0)
+        self.assertEqual(fwd.main(["palettes", "brutalist"]), 0)
+        self.assertEqual(fwd.main(["palettes", "mauve"]), 2)
+        self.assertEqual(fwd.main(["palettes", "--json"]), 0)
+
+    def test_figma_script_is_filled_in_from_the_file(self):
+        script = fwd.pal.figma_script(fwd.REPO, self.data)
+        self.assertNotIn("__MODES__", script)
+        modes = fwd.pal.figma_modes(self.data)
+        self.assertEqual([m["name"] for m in modes], ["Bear Brown", "Bear Brown dark", "Brutalist", "Brutalist dark",
+                                                      "Northeastern", "Humanitarians AI", "Humanitarians AI dark", "Wireframe"])
+        for m in modes:
+            self.assertIn(m["roles"]["accent"], script)
+        one = fwd.pal.figma_modes(self.data, "northeastern")
+        self.assertEqual([m["name"] for m in one], ["Northeastern", "Wireframe"])
+        self.assertTrue(all(c["passes"] for c in fwd.pal.checks(fwd.pal.wireframe(self.data))))
+        self.assertEqual(fwd.main(["palettes", "wireframe"]), 0)
+        self.assertEqual(fwd.main(["palettes", "northeastern", "--figma"]), 0)
+        self.assertEqual(fwd.main(["palettes", "mauve", "--figma"]), 2)
+
+    def test_figma_script_never_carries_a_typed_color(self):
+        template = (fwd.REPO / "figma" / "palette-variables.js").read_text()
+        import re
+        self.assertEqual(re.findall(r"#[0-9A-Fa-f]{6}\b", template), [])
+
+
 if __name__ == "__main__":
     unittest.main()

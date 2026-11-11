@@ -22,6 +22,7 @@ The skill folder has a command, `fwd`, and a `CLAUDE.md` that says how to answer
 
 - `help` runs `fwd help` (setup checks plus one next step) and, with the Figma tools present, `whoami` for the seat. Missing things first; one next step; no changes made on the student's behalf.
 - `tutorial` runs the seven-step first tutorial (redesign your home page). It is this skill's own phases, driven step by step.
+- `fwd palettes [id]` lists the four default color sets, or prints one with its roles and worked-out contrast. `--json` gives the same to a script; `--figma` prints the ready-to-run Figma script that creates the color variables. See Colors below.
 - `fwd approve|reject|defer <D-id>` is the student's, run in their own terminal. It writes the approval file and the ledger event. Non-negotiable 1 applies: never run it, never write `audit/approvals/`.
 - `fwd ledger verify` checks the hash chain and that each approval file matches the ledger.
 
@@ -76,6 +77,7 @@ implementer: ""               # required: "claude-code" or "codex"
 conformance_target: "WCAG 2.2 AA"
 breakpoints: "derive"         # "derive" from site CSS, or a list of widths
 house_rules: ""               # path to design-system tokens, or "none"
+palette: "bear-brown"         # colors of the wireframe kit: bear-brown, brutalist, northeastern, humanitarians
 figma_file: ""                # required for Figma phases; blank = JSON-only mode
 approvers: []                 # required: names and roles
 out_of_scope: []
@@ -95,7 +97,30 @@ Before Phase 2, write `capabilities.json`:
 - Load Figma's `figma-use` skill before any `use_figma` call.
 - Read the live `use_figma` tool schema and record whether it accepts a `skillNames` parameter. A comparable Figma skill (Throughline) passes `skillNames: "throughline"` on every call. If the parameter exists, pass `skillNames: "figma-webdesigner"` on every `use_figma` call; if not, record `skillNames: unsupported`.
 - Known from the first run (2026-11-07, Full student seat), re-verify rather than assume: `setSharedPluginData` works; `addAnnotationCategoryAsync` and `node.annotations` (with `labelMarkdown` and `categoryId`) work; `figma.saveVersionHistoryAsync` is NOT supported, so the agent can never create the baseline version; `figma.root.name` is NOT settable, so the file cannot be renamed through the API. If any of these now fail, carry decision IDs in frame names as `⟦D-0007⟧` plus annotations, and record the result.
+- How many modes one variable collection may have on this plan (try a second mode on the `Palette` collection; a refusal means one mode, so light only). Record it.
 - Name the Figma file for the site (for example `jobs.humanitarians.ai`) when calling `create_new_file`; it cannot be renamed afterwards. Pages are stages (`00 Kit & Legend`, `01 As-Is Wireframes`, `02 To-Be Wireframes`); frames are `page / width / as-is|to-be / state`.
+
+## Colors
+
+The wireframe kit is drawn in one of four default color sets. They are in `palettes/palettes.json`, each read from the site it is named for (the file records the page and the date), and the same file ships in the sibling skill `figma-appdesigner`.
+
+| id | Name | Read from | Modes |
+|---|---|---|---|
+| `bear-brown` (default) | Bear Brown | bearbrown.co | light, dark |
+| `brutalist` | Brutalist | brutalist.art | light, dark |
+| `northeastern` | Northeastern | brand.northeastern.edu, the color page | light |
+| `humanitarians` | Humanitarians AI | humanitarians.ai | light, dark |
+
+Each set fills the same seven roles: `ground`, `surface`, `ink`, `ink-soft`, `border`, `accent`, `on-accent`. Rules:
+
+1. **Ask, don't assume.** In Phase 0, show the four (`fwd palettes`) and ask which one. With no answer, use the default and say so. Record the choice in `intent.yaml` as `palette`.
+2. **Get the values from the command, never from memory.** `fwd palettes <id> --figma` prints `figma/palette-variables.js` with that set's colors filled in. Run that script; do not type a hex value. (`fwd palettes <id> --json` gives the same values as data.)
+3. **Make them Figma variables, once.** The script creates a variable collection named `Palette` with one variable per role (`palette/ground`, …), two font-family variables (`type/heading`, `type/body`), and one mode per light or dark version. Bind every fill, stroke and text color in the kit and the wireframes to those variables. No raw hex on a wireframe node. The script's receipt lists any mode the plan refused (`modeErrors`); record that in `capabilities.json`. On the first run (2026-11-10, education plan, in the sibling skill) one collection accepted eight modes; a Starter team allows one.
+4. **Wireframes can be grey.** The script also makes a `Wireframe` mode: greys only, in `palettes.json` beside the four sets (`fwd palettes wireframe`). A frame set to that mode shows the layout with no brand color, and switching the frame's mode back shows it in the chosen set. Use it when the person wants to judge structure before color. As-is and to-be still use the same mode as each other.
+5. **As-is and to-be use the same set.** The palette is the color of the drawing, not a claim about the site's colors, and a palette difference between the two pages would be a difference with no decision ID (non-negotiable 4). To propose a color change to the site itself, that is a visual finding and a decision like any other.
+6. **Report the low pairs.** `fwd palettes <id>` works out each text and control pairing and marks any under its WCAG minimum as `LOW`. Tell the user which pairs are low in the set they chose, and do not use a low pair for text. Two exist today: Brutalist's secondary text on its slate surface, and the Humanitarians dark-mode red against its dark ground.
+7. **Colors are not permission.** The Northeastern set is the university's published palette; it does not allow using its logos or name. Do not place any organisation's logo in a wireframe unless the user supplies it and says they may.
+8. A site with its own tokens (`house_rules` is a path) keeps them for visual-fidelity work on `03 Visual Findings`. The palette still colors the wireframe kit.
 
 ## `use_figma` script conventions
 

@@ -24,17 +24,34 @@ The first tutorial is the one this was built from: take your home page, wirefram
 | `./fwd check [--json]` | The checks alone |
 | `./fwd init <site folder>` | Makes an audit folder for your site's local copy |
 | `./fwd tutorial` | Shows the seven steps and the current one |
+| `./fwd palettes [id]` | The four default color sets, or one in full with its contrast worked out |
 | `./fwd approve <D-id>` (also `reject`, `defer`) | **You** decide a change, in your own terminal |
 | `./fwd ledger verify` | Checks the record has not been altered |
 | `./fwd install` | Links this folder as a Claude skill for every project |
 
 Needs Python 3.9+ (standard library only), git, and for your site, Node 18+.
 
+## Colors
+
+The wireframes are drawn in one of four default color sets, each read from the site it is named for:
+
+| id | Read from | Ground | Ink | Accent |
+|---|---|---|---|---|
+| `bear-brown` (default) | [bearbrown.co](https://www.bearbrown.co/) | `#FAF9F5` | `#3D3929` | `#8B3A0F` |
+| `brutalist` | [brutalist.art](https://www.brutalist.art/) | `#FFFFFF` | `#020817` | `#000000` |
+| `northeastern` | [Northeastern Brand Center, color](https://brand.northeastern.edu/design-and-experiences/design/color/) | `#FFFFFF` | `#000000` | `#C8102E` |
+| `humanitarians` | [humanitarians.ai](https://www.humanitarians.ai/) | `#FFFFFF` | `#1B1B1B` | `#7A0000` |
+
+`./fwd palettes bear-brown` prints every role, light and dark, and works out the contrast of each text and button pairing. Choose one with `palette:` in `audit/intent.yaml`, or `./fwd init <site> --palette northeastern`. The values live in [palettes/palettes.json](palettes/palettes.json); the app-design sibling, figma-appdesigner, ships the same file.
+
+The Northeastern set is the university's published palette. It is not permission to use its name or logos.
+
 ## Status: early
 
 - The skill has been run by hand once, on the front page of [jobs.humanitarians.ai](https://jobs.humanitarians.ai/): audit, Figma wireframes, Vercel preview, production.
-- The `fwd` command and tutorial are new and have been tested here only: 15 unit tests, a real run of `help` against a machine that has everything but a site, and the ledger check against the jobs audit (43 events, valid). **Not yet tested:** a clean machine without Node or Figma, a student running the whole tutorial, Windows.
+- The `fwd` command and tutorial are new and have been tested here only: 25 unit tests, a real run of `help` against a machine that has everything but a site, and the ledger check against the jobs audit (43 events, valid). **Not yet tested:** a clean machine without Node or Figma, a student running the whole tutorial, Windows.
 - `./fwd approve` refuses to run unless a person is at a terminal. That prevents accidents; it is not a lock. The real control is that you commit the approval file and someone can review it.
+- The color sets were read from the four sites on 2026-11-10 and are not re-read automatically. The script that puts them into Figma as variables (`./fwd palettes --figma`) was run once, in the sibling tool figma-appdesigner, and the colors read back correctly. Drawing this tool's wireframe kit in each set has not been tried yet.
 - No `LICENSE` file has been chosen yet, so all rights are reserved until the author adds one.
 
 ## What you need

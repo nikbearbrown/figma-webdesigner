@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""figma-webdesigner command line: help, check, init, tutorial, approve/reject/defer, ledger, install.
+"""figma-webdesigner command line: help, check, init, tutorial, palettes, approve/reject/defer, ledger, install.
 
 Standard library only. Run it through ./fwd.
 
@@ -23,7 +23,10 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-VERSION = "0.2.0"
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # ./fwd runs python -I, which drops the script folder
+import palettes as pal  # noqa: E402
+
+VERSION = "0.3.0"
 REPO = Path(__file__).resolve().parent.parent
 HOME = Path(os.environ.get("FWD_HOME", str(Path.home() / "figma-webdesigner-work")))
 STATE_FILE = HOME / "state.json"
@@ -282,6 +285,7 @@ def run_checks(site_override: str | None = None, with_mcp: bool = True) -> list[
         miss = missing_intent(audit)
         items.append(check_item("intent", "audit intent (intent.yaml)", "ok" if not miss else "todo",
                                 "complete" if not miss else "still to fill in: " + ", ".join(miss) + " (Claude asks in step 2)", required=False))
+        items.append(palette_check(read_intent(audit / "intent.yaml").get("palette", "")))
     else:
         items.append(check_item("intent", "audit workspace", "todo", "not created yet (./fwd init creates it)", required=False))
 
@@ -290,6 +294,18 @@ def run_checks(site_override: str | None = None, with_mcp: bool = True) -> list[
                             str(SKILL_LINK) if linked else "not installed: Claude only sees it when opened in this folder",
                             [] if linked else ["./fwd install"], required=False))
     return items
+
+
+def palette_check(chosen: str) -> dict:
+    """Which of the default color sets the wireframes use. Never blocks: an unknown name falls back, out loud."""
+    data = pal.load(REPO)
+    known = pal.ids(data)
+    if not chosen:
+        return check_item("palette", "colors", "ok", f"{data['default']} (the default; ./fwd palettes lists all {len(known)})", required=False)
+    if chosen in known:
+        return check_item("palette", "colors", "ok", f"{chosen} ({pal.find(data, chosen)['name']})", required=False)
+    return check_item("palette", "colors", "warn", f"'{chosen}' is not one of: {', '.join(known)}. {data['default']} will be used",
+                      ["Set palette: in audit/intent.yaml to one of those, or run ./fwd palettes"], required=False)
 
 
 MARK = {"ok": "[ok]     ", "missing": "[missing]", "warn": "[check]  ", "unknown": "[?]      ", "todo": "[todo]   "}
@@ -421,6 +437,7 @@ implementer: ""               # required: "claude-code" or "codex"
 conformance_target: "WCAG 2.2 AA"
 breakpoints: [1440, 390]
 house_rules: none
+palette: {palette}           # colors for the wireframes: {palette_ids} (./fwd palettes)
 figma_file: ""                # blank until Claude creates the Figma file for this site
 approvers: []                 # required: your name and role
 out_of_scope: []
@@ -436,6 +453,9 @@ def cmd_init(args) -> int:
     if not f.get("git"):
         print(f"{site} is not a git repository. The audit pins a commit, so it needs one.\n  git clone <your-repo-url> <folder>")
         return 2
+    if getattr(args, "palette", None) and args.palette not in pal.ids(pal.load(REPO)):
+        print(f"'{args.palette}' is not one of the color sets: {', '.join(pal.ids(pal.load(REPO)))}. Nothing was created.")
+        return 2
     label = args.label or slug(site.name)
     ws = HOME / label
     audit = ws / "audit"
@@ -444,7 +464,10 @@ def cmd_init(args) -> int:
         (audit / d).mkdir(parents=True, exist_ok=True)
     if not (audit / "intent.yaml").exists():
         dev = '"npm run dev"' if f.get("dev_script") else '""'
-        (audit / "intent.yaml").write_text(INTENT_TEMPLATE.format(label=label, repo=f.get("remote") or '""', path=str(site), commit=f.get("commit", ""), dev=dev))
+        pdata = pal.load(REPO)
+        chosen = getattr(args, "palette", None) or pdata["default"]
+        (audit / "intent.yaml").write_text(INTENT_TEMPLATE.format(label=label, repo=f.get("remote") or '""', path=str(site), commit=f.get("commit", ""), dev=dev,
+                                                                  palette=chosen, palette_ids=", ".join(pal.ids(pdata))))
     if not (audit / "rulebook" / "rules.yaml").exists():
         shutil.copy(REPO / "starter" / "rules.yaml", audit / "rulebook" / "rules.yaml")
     if created:
@@ -544,6 +567,43 @@ def cmd_decide(args) -> int:
     return decide(args.verb, args.decision, audit, reopen=args.reopen)
 
 
+# ───────────────────────── palettes ─────────────────────────
+
+def cmd_palettes(args) -> int:
+    data = pal.load(REPO)
+    bad = pal.problems(data)
+    if bad:
+        print("palettes/palettes.json has problems:")
+        for b in bad:
+            print("  - " + b)
+        return 1
+    if args.figma:
+        if args.name and not pal.find(data, args.name):
+            print(f"There is no color set called '{args.name}'. The sets are: {', '.join(pal.ids(data))}.")
+            return 2
+        print(pal.figma_script(REPO, data, args.name))
+        return 0
+    if args.json:
+        one = pal.find(data, args.name) if args.name else None
+        if args.name and not one:
+            print(json.dumps({"error": f"no palette {args.name}", "known": pal.ids(data)}))
+            return 2
+        chosen = [one] if one else data["palettes"]
+        print(json.dumps({"checked": data["checked"], "default": data["default"], "roles": data["roles"],
+                          "palettes": [{**p, "contrast": pal.checks(p)} for p in chosen]}, indent=2))
+        return 0
+    if not args.name:
+        pal.print_list(data)
+        print("\nSee one in full, with its contrast worked out:  ./fwd palettes <id>")
+        return 0
+    one = pal.find(data, args.name) or (pal.wireframe(data) if args.name == "wireframe" else None)
+    if not one:
+        print(f"There is no color set called '{args.name}'. The sets are: {', '.join(pal.ids(data))}.")
+        return 2
+    pal.print_one(one)
+    return 0
+
+
 # ───────────────────────── ledger / install / help ─────────────────────────
 
 def cmd_ledger(args) -> int:
@@ -588,6 +648,7 @@ HELP_COMMANDS = """COMMANDS
   ./fwd check [--json]         the checks alone (--no-mcp skips the slow Figma check)
   ./fwd init <site folder>     set up an audit folder for your site's local copy
   ./fwd tutorial               the first tutorial: redesign your home page
+  ./fwd palettes [id]          the default colors: bear-brown, brutalist, northeastern, humanitarians
   ./fwd approve <D-id>         YOU accept a change (also: reject, defer). Your terminal only.
   ./fwd ledger verify          check the record has not been altered
   ./fwd install                make this a Claude skill available in every folder
@@ -637,6 +698,11 @@ def build_parser() -> argparse.ArgumentParser:
     i = sub.add_parser("init", add_help=False)
     i.add_argument("site")
     i.add_argument("--label")
+    i.add_argument("--palette")
+    pp = sub.add_parser("palettes", add_help=False)
+    pp.add_argument("name", nargs="?")
+    pp.add_argument("--json", action="store_true")
+    pp.add_argument("--figma", action="store_true")
     t = sub.add_parser("tutorial", add_help=False)
     t.add_argument("action", nargs="?", default="show", choices=["show", "done", "reset"])
     t.add_argument("n", nargs="?")
@@ -673,6 +739,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_init(args)
     if args.cmd == "tutorial":
         return cmd_tutorial(args)
+    if args.cmd == "palettes":
+        return cmd_palettes(args)
     if args.cmd in OUTCOME:
         return cmd_decide(args)
     if args.cmd == "ledger":
