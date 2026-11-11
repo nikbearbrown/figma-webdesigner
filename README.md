@@ -25,6 +25,7 @@ The first tutorial is the one this was built from: take your home page, wirefram
 | `./fwd init <site folder>` | Makes an audit folder for your site's local copy |
 | `./fwd tutorial` | Shows the seven steps and the current one |
 | `./fwd palettes [id]` | The four default color sets, or one in full with its contrast worked out |
+| `./fwd templates [kind]` | Open-licensed website templates (portfolio, blog, docs, ...), with credits |
 | `./fwd approve <D-id>` (also `reject`, `defer`) | **You** decide a change, in your own terminal |
 | `./fwd ledger verify` | Checks the record has not been altered |
 | `./fwd install` | Links this folder as a Claude skill for every project |
@@ -46,10 +47,26 @@ The wireframes are drawn in one of four default color sets, each read from the s
 
 The Northeastern set is the university's published palette. It is not permission to use its name or logos.
 
+## Templates
+
+`./fwd templates` lists 360 open-licensed website templates, themes and starters on GitHub, and `./fwd templates portfolio` (or `blog`, `documentation`, `astro`, any word) narrows it. They are for someone who has no site yet, or whose audit ends in "start again from something sound": a template gives the implementer a working base, and the audit and wireframes still decide what the pages say.
+
+| | |
+|---|---|
+| Kinds of site | blog 59, documentation 35, portfolio 29, landing page 27, dashboard 24, SaaS marketing 23, personal site 18, and 21 more kinds |
+| Built with | Next.js 57, Jekyll 51, Hugo 50, Astro 45, Bootstrap 31, Gatsby 16, Eleventy 15, plain HTML 14, and others |
+| Licences | 340 copy with credit (MIT for most), 20 copyleft (your site's code must be shared the same way) |
+
+Only templates with a confirmed licence that allows reuse are listed, each with a credit line; [templates/CREDITS.md](templates/CREDITS.md) lists them all. The search found 22 more with no licence file, a custom or non-commercial licence, or a README that restricts reuse. Those are kept out of this repository. This tool links to templates; it does not contain copies of them.
+
+How far to trust the list, as of 2026-11-10: every repository was looked up twice through GitHub's API. All exist, and licence, archived flag and stars match. What pages each template really has, and whether its demo link still works, was not checked. A template's demo photos, fonts and icons often carry their own terms; where its README says so, the entry says so. Open a template's licence before you build on it.
+
+Thin spots: one job-board template, three for newsletters (all need Ghost), three for restaurants, and few for nonprofits and clubs.
+
 ## Status: early
 
 - The skill has been run by hand once, on the front page of [jobs.humanitarians.ai](https://jobs.humanitarians.ai/): audit, Figma wireframes, Vercel preview, production.
-- The `fwd` command and tutorial are new and have been tested here only: 25 unit tests, a real run of `help` against a machine that has everything but a site, and the ledger check against the jobs audit (43 events, valid). **Not yet tested:** a clean machine without Node or Figma, a student running the whole tutorial, Windows.
+- The `fwd` command and tutorial are new and have been tested here only: 27 unit tests, a real run of `help` against a machine that has everything but a site, and the ledger check against the jobs audit (43 events, valid). **Not yet tested:** a clean machine without Node or Figma, a student running the whole tutorial, Windows.
 - `./fwd approve` refuses to run unless a person is at a terminal. That prevents accidents; it is not a lock. The real control is that you commit the approval file and someone can review it.
 - The color sets were read from the four sites on 2026-11-10 and are not re-read automatically. The script that puts them into Figma as variables (`./fwd palettes --figma`) was run once, in the sibling tool figma-appdesigner, and the colors read back correctly. Drawing this tool's wireframe kit in each set has not been tried yet.
 - No `LICENSE` file has been chosen yet, so all rights are reserved until the author adds one.

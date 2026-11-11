@@ -22,6 +22,7 @@ The skill folder has a command, `fwd`, and a `CLAUDE.md` that says how to answer
 
 - `help` runs `fwd help` (setup checks plus one next step) and, with the Figma tools present, `whoami` for the seat. Missing things first; one next step; no changes made on the student's behalf.
 - `tutorial` runs the seven-step first tutorial (redesign your home page). It is this skill's own phases, driven step by step.
+- `fwd templates [kind]` lists open-licensed website templates for common kinds of site, with each one's licence and the credit to give. `--credits` prints the whole credits list. See Templates below.
 - `fwd palettes [id]` lists the four default color sets, or prints one with its roles and worked-out contrast. `--json` gives the same to a script; `--figma` prints the ready-to-run Figma script that creates the color variables. See Colors below.
 - `fwd approve|reject|defer <D-id>` is the student's, run in their own terminal. It writes the approval file and the ledger event. Non-negotiable 1 applies: never run it, never write `audit/approvals/`.
 - `fwd ledger verify` checks the hash chain and that each approval file matches the ledger.
@@ -121,6 +122,18 @@ Each set fills the same seven roles: `ground`, `surface`, `ink`, `ink-soft`, `bo
 6. **Report the low pairs.** `fwd palettes <id>` works out each text and control pairing and marks any under its WCAG minimum as `LOW`. Tell the user which pairs are low in the set they chose, and do not use a low pair for text. Two exist today: Brutalist's secondary text on its slate surface, and the Humanitarians dark-mode red against its dark ground.
 7. **Colors are not permission.** The Northeastern set is the university's published palette; it does not allow using its logos or name. Do not place any organisation's logo in a wireframe unless the user supplies it and says they may.
 8. A site with its own tokens (`house_rules` is a path) keeps them for visual-fidelity work on `03 Visual Findings`. The palette still colors the wireframe kit.
+
+## Templates
+
+`templates/site-templates.json` is a catalog of open-licensed website templates, themes and starters on GitHub, and `templates/CREDITS.md` is made from it. `fwd templates` shows the kinds; `fwd templates portfolio` (any word) lists matches.
+
+- Offer templates in two cases only: the person has no site yet, or an approved decision says to rebuild on a new base. An audit of a site that exists does not start with "use a template".
+- A template is a base for the implementer, named in the handoff brief with its licence and credit line. It never replaces the audit, the wireframes or a decision record.
+- Say the licence with each one. `copy with credit` (MIT, Apache-2.0, BSD, ISC, CC0, CC BY): build from it and keep its licence notice. `copyleft: share alike` (GPL, AGPL, LGPL, MPL): the site's code would have to be shared under the same terms; say that plainly before the person chooses it.
+- Read an entry's `limits`. Demo photos, fonts and icons often carry their own terms and must be replaced, and some authors ask for a visible credit.
+- Only templates with a confirmed licence that allows reuse are published in the catalog. Do not suggest one from memory that is not in it without saying its licence is unchecked.
+- The catalog was gathered by search and checked against GitHub's licence data on the date in the file. It is not an audit. The person opens the licence before building on one. Do not clone or download a template unless the person asks.
+- Never copy a template's design into the to-be wireframes as if it were the proposal. A to-be frame comes from findings and decisions.
 
 ## `use_figma` script conventions
 

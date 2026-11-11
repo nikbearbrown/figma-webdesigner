@@ -26,7 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # ./fwd runs python -I, which drops the script folder
 import palettes as pal  # noqa: E402
 
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 REPO = Path(__file__).resolve().parent.parent
 HOME = Path(os.environ.get("FWD_HOME", str(Path.home() / "figma-webdesigner-work")))
 STATE_FILE = HOME / "state.json"
@@ -604,6 +604,99 @@ def cmd_palettes(args) -> int:
     return 0
 
 
+# ───────────────────────── templates ─────────────────────────
+
+USABLE_ORDER = ["copy with credit", "copyleft: share alike"]
+
+
+def load_templates(folder: Path) -> dict:
+    """The catalog of open website templates, tolerant of a missing or broken file."""
+    out = {"sites": [], "checked": "", "problems": []}
+    p = folder / "site-templates.json"
+    if not p.exists():
+        out["problems"].append("site-templates.json is not here yet")
+        return out
+    try:
+        data = json.loads(p.read_text())
+    except ValueError:
+        out["problems"].append("site-templates.json is not valid JSON")
+        return out
+    out["sites"] = [e for e in data.get("entries", []) if isinstance(e, dict) and e.get("url")]
+    out["checked"] = data.get("checked", "")
+    return out
+
+
+def template_label(e: dict) -> str:
+    return e.get("name", "") + (f" / {e['path']}" if e.get("path") else "")
+
+
+def template_matches(entry: dict, word: str) -> bool:
+    hay = " ".join(str(entry.get(k, "")) for k in ("kind", "name", "path", "what", "stack")).lower()
+    return word.lower() in hay
+
+
+def credits_markdown(cat: dict) -> str:
+    """templates/CREDITS.md, made from the catalog so it cannot drift from it."""
+    lines = ["# Credits", "",
+             "Every website template this tool points to, with the licence it is offered under and who made it.",
+             "This tool links to these works; it does not contain copies of them. If you build on one, this is the credit to give,",
+             "and its licence file is the thing to read first.", "",
+             f"Made by `./fwd templates --credits` from the catalog in this folder ({len(cat['sites'])} templates). Do not edit by hand.", ""]
+    by_lic: dict[str, list[dict]] = {}
+    for e in cat["sites"]:
+        by_lic.setdefault(str(e.get("license")), []).append(e)
+    for lic in sorted(by_lic, key=lambda k: (-len(by_lic[k]), k)):
+        lines += [f"## {lic} ({len(by_lic[lic])})", ""]
+        for e in sorted(by_lic[lic], key=lambda e: template_label(e).lower()):
+            who = e.get("by") or e.get("name", "").split("/")[0] + " and contributors"
+            lines.append(f"- [{template_label(e)}]({e['url']}), by {who}")
+        lines.append("")
+    return "\n".join(lines)
+
+
+def cmd_templates(args) -> int:
+    cat = load_templates(REPO / "templates")
+    if not cat["sites"]:
+        print("No template catalog yet: " + "; ".join(cat["problems"]) + ".")
+        return 2
+    if args.credits:
+        print(credits_markdown(cat), end="")
+        return 0
+    if args.json:
+        pick = (lambda e: template_matches(e, args.kind)) if args.kind else (lambda e: True)
+        print(json.dumps({"checked": cat["checked"], "sites": [e for e in cat["sites"] if pick(e)]}, indent=2))
+        return 0
+    if not args.kind:
+        print(f"Open-licensed website templates: {len(cat['sites'])}, gathered {cat['checked']}.\n")
+        for field, title in (("kind", "By kind of site"), ("stack", "By what they are built with")):
+            counts: dict[str, int] = {}
+            for e in cat["sites"]:
+                k = str(e.get(field) or "other").lower()
+                counts[k] = counts.get(k, 0) + 1
+            print(f"{title}\n  " + ", ".join(f"{k} {n}" for k, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))) + "\n")
+        print('See one kind:  ./fwd templates portfolio      (any word: "blog", "astro", "documentation")')
+        print("Each has a licence that allows reuse and a credit to give. Open the licence before you build on one.")
+        return 0
+    hits = [e for e in cat["sites"] if template_matches(e, args.kind)]
+    if not hits:
+        print(f"Nothing in the catalog matches '{args.kind}'. Run ./fwd templates to see the kinds.")
+        return 2
+    hits.sort(key=lambda e: (USABLE_ORDER.index(e["usable"]) if e.get("usable") in USABLE_ORDER else 9, -(e.get("stars") or 0)))
+    print(f"{len(hits)} matching '{args.kind}'")
+    for e in hits:
+        flags = "".join(f" [{f}]" for f in ("official", "archived", "stale") if e.get(f))
+        print(f"  {template_label(e)}  ({e.get('stack', '?')}, {e.get('license')}: {e.get('usable')}){flags}")
+        print(f"      {e.get('what', '')}")
+        if e.get("limits"):
+            print(f"      Limits: {e['limits']}")
+        if e.get("demo"):
+            print(f"      See it: {e['demo']}")
+        print(f"      {e['url']}")
+    print("\ncopy with credit = you may build from it and must keep its licence notice. copyleft = your site's code must be shared under the same terms.")
+    print("Gathered by search and checked against GitHub's licence data, not audited. Open the licence before you build on one.")
+    return 0
+
+
 # ───────────────────────── ledger / install / help ─────────────────────────
 
 def cmd_ledger(args) -> int:
@@ -649,6 +742,7 @@ HELP_COMMANDS = """COMMANDS
   ./fwd init <site folder>     set up an audit folder for your site's local copy
   ./fwd tutorial               the first tutorial: redesign your home page
   ./fwd palettes [id]          the default colors: bear-brown, brutalist, northeastern, humanitarians
+  ./fwd templates [kind]       open-licensed website templates (portfolio, blog, docs, ...), with credits
   ./fwd approve <D-id>         YOU accept a change (also: reject, defer). Your terminal only.
   ./fwd ledger verify          check the record has not been altered
   ./fwd install                make this a Claude skill available in every folder
@@ -706,6 +800,10 @@ def build_parser() -> argparse.ArgumentParser:
     t = sub.add_parser("tutorial", add_help=False)
     t.add_argument("action", nargs="?", default="show", choices=["show", "done", "reset"])
     t.add_argument("n", nargs="?")
+    tp = sub.add_parser("templates", add_help=False)
+    tp.add_argument("kind", nargs="?")
+    tp.add_argument("--json", action="store_true")
+    tp.add_argument("--credits", action="store_true")
     for verb in OUTCOME:
         d = sub.add_parser(verb, add_help=False)
         d.set_defaults(verb=verb)
@@ -741,6 +839,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_tutorial(args)
     if args.cmd == "palettes":
         return cmd_palettes(args)
+    if args.cmd == "templates":
+        return cmd_templates(args)
     if args.cmd in OUTCOME:
         return cmd_decide(args)
     if args.cmd == "ledger":

@@ -38,6 +38,13 @@ If the skill is installed (`./fwd install`), run the command by its path: `~/.cl
 3. In tutorial step 2, ask which set the wireframes should use and write it to `palette:` in `audit/intent.yaml`. No answer means the default; say that you used it.
 4. To put the colors in Figma, run the script that `./fwd palettes <id> --figma` prints. Never retype a hex value from memory. `SKILL.md`, Colors, has the rules.
 
+## When the user asks for templates (or types `templates`)
+
+1. Run `./fwd templates` for the counts by kind and by what they are built with, or `./fwd templates <word>` (for example `portfolio`, `blog`, `astro`) for the list.
+2. Say each one's licence and what it allows, in the words the command prints: copy with credit, or copyleft (share alike). Read out any `Limits` line. Every entry has a credit line; `./fwd templates --credits` prints them all.
+3. Templates are for someone with no site yet, or for an approved decision to rebuild. They do not replace the audit. `SKILL.md`, Templates, has the rules.
+4. The list was gathered by search and checked against GitHub's licence data. Before anyone builds on a template, they open its licence and confirm it. Do not clone or download a template unless the person asks.
+
 ## Other commands
 
 - `check`: `./fwd check` (add `--json` to parse it). Same checks as `help`, no commentary.

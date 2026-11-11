@@ -280,5 +280,47 @@ class Palettes(Base):
         self.assertEqual(re.findall(r"#[0-9A-Fa-f]{6}\b", template), [])
 
 
+class Templates(Base):
+    def catalog(self):
+        folder = self.root / "templates"
+        folder.mkdir()
+        (folder / "site-templates.json").write_text(json.dumps({"checked": "2026-11-10", "entries": [
+            {"name": "a/folio", "url": "https://github.com/a/folio", "kind": "portfolio", "stack": "astro", "what": "A portfolio", "by": "A",
+             "license": "MIT", "license_checked": True, "usable": "copy with credit", "stars": 10},
+            {"name": "b/docs", "url": "https://github.com/b/docs/tree/main/starter", "path": "starter", "kind": "documentation", "stack": "hugo",
+             "what": "Docs", "by": "B", "license": "GPL-3.0", "license_checked": True, "usable": "copyleft: share alike", "stars": 99},
+            {"name": "no-url"},
+        ]}))
+        return folder
+
+    def test_load_match_and_credits(self):
+        cat = fwd.load_templates(self.catalog())
+        self.assertEqual([fwd.template_label(e) for e in cat["sites"]], ["a/folio", "b/docs / starter"])
+        self.assertTrue(fwd.template_matches(cat["sites"][0], "ASTRO"))
+        self.assertFalse(fwd.template_matches(cat["sites"][1], "portfolio"))
+        md = fwd.credits_markdown(cat)
+        self.assertIn("[a/folio](https://github.com/a/folio), by A", md)
+        self.assertIn("## GPL-3.0 (1)", md)
+        self.assertEqual(fwd.load_templates(self.root / "nowhere")["sites"], [])
+
+    def test_shipped_catalog_lists_only_templates_with_a_reuse_licence_and_a_credit(self):
+        folder = fwd.REPO / "templates"
+        if not (folder / "site-templates.json").exists():
+            self.skipTest("no catalog shipped yet")
+        cat = fwd.load_templates(folder)
+        self.assertEqual(cat["problems"], [])
+        self.assertGreater(len(cat["sites"]), 20)
+        for e in cat["sites"]:
+            self.assertTrue(e["url"].startswith("https://github.com/"), e)
+            self.assertIn(e.get("usable"), fwd.USABLE_ORDER, e)
+            self.assertTrue(e.get("license_checked") and e.get("license") not in (None, "none"), e)
+            self.assertIn(e["license"], e.get("credit", ""), e)
+        urls = [e["url"].lower().rstrip("/") for e in cat["sites"]]
+        self.assertEqual(len(urls), len(set(urls)), "a template is listed twice")
+        self.assertEqual((folder / "CREDITS.md").read_text(), fwd.credits_markdown(cat))
+        self.assertEqual(fwd.main(["templates"]), 0)
+        self.assertEqual(fwd.main(["templates", "zzzz-no-such-kind"]), 2)
+
+
 if __name__ == "__main__":
     unittest.main()

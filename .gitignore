@@ -2,3 +2,5 @@
 node_modules/
 __pycache__/
 *.pyc
+# found by the template search but not published: no reuse licence confirmed
+templates/held-back/
